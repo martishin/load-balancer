@@ -11,6 +11,7 @@ Usage of ./load-balancer:
 ```
 
 ## Running Locally
+* Build the load balancer: `make build`
 * Run the balancer and 3 example web-servers: `make run`
 * The balancer will be listening on port `8080`
 
