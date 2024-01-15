@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+    load-balancer:
+        image: load-balancer
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: load-balancer
+        ports:
+            - "8080:80"
+        command: [ "/app/load-balancer", "--backends", "http://web1:80,http://web2:80,http://web3:80", "--port", "80" ]
+    web1:
+        image: strm/helloworld-http
+    web2:
+        image: strm/helloworld-http
+    web3:
+        image: strm/helloworld-http
