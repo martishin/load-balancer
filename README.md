@@ -1,5 +1,5 @@
 # Load Balancer 
-Simple round robin load balancer with healthchecks implemented with Go, [demo](https://load-balancer.martishin.com/)
+Simple round-robin load balancer with health checks implemented with Go, [demo](https://load-balancer.martishin.com/)
 
 ## How to Use
 ```
