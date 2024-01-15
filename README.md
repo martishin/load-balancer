@@ -13,3 +13,6 @@ Usage of ./load-balancer:
 ## Running Locally
 * Run the balancer and 3 example web-servers: `make run`
 * The balancer will be listening on port `8080`
+
+## Testing
+* Run tests: `make test`
