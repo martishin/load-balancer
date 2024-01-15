@@ -14,6 +14,7 @@ type ServerPool interface {
 	AddServer(server *models.Server)
 	MarkServerStatus(url *url.URL, alive bool)
 	GetNextServer() *models.Server
+	IsServerAlive(url *url.URL) bool
 	HealthCheck()
 }
 
@@ -44,6 +45,15 @@ func (s *DefaultServerPool) MarkServerStatus(url *url.URL, alive bool) {
 			break
 		}
 	}
+}
+
+func (s *DefaultServerPool) IsServerAlive(url *url.URL) bool {
+	for _, server := range s.servers {
+		if server.URL.String() == url.String() {
+			return server.IsAlive()
+		}
+	}
+	return false
 }
 
 func (s *DefaultServerPool) GetNextServer() *models.Server {

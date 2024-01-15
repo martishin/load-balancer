@@ -8,16 +8,13 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/tty-monkey/load-balancer/internal/models"
 	"github.com/tty-monkey/load-balancer/internal/service"
 )
 
 func main() {
-	app := application{
-		serverPool: service.NewServerPool(),
-	}
-
 	var serverList string
 	var port int
 
@@ -27,33 +24,58 @@ func main() {
 
 	serverUrls := strings.Split(serverList, ",")
 
+	balancer, err := setupLoadBalancer(serverUrls)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := startServer(balancer, port); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Load Balancer started at :%d\n", port)
+}
+
+func setupLoadBalancer(serverUrls []string) (service.Balancer, error) {
+	balancer := service.NewBalancer(service.NewServerPool())
+
 	for _, urlString := range serverUrls {
 		serverUrl, err := url.Parse(urlString)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 		proxy := httputil.NewSingleHostReverseProxy(serverUrl)
-		proxy.ErrorHandler = app.handleError(serverUrl, proxy)
+		proxy.ErrorHandler = balancer.HandleError(serverUrl, proxy)
 
-		app.serverPool.AddServer(
+		balancer.AddServer(
 			&models.Server{
 				URL:   serverUrl,
 				Alive: true,
 				Proxy: proxy,
 			},
 		)
-		log.Printf("Configured server: %s\n", serverUrl)
 	}
 
+	return balancer, nil
+}
+
+func startServer(balancer service.Balancer, port int) error {
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: http.HandlerFunc(app.loadBalance),
+		Handler: http.HandlerFunc(balancer.LoadBalance),
 	}
 
-	go app.healthCheck()
+	go startHealthChecks(balancer)
 
-	log.Printf("Load Balancer started at :%d\n", port)
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatal(err)
+	return server.ListenAndServe()
+}
+
+func startHealthChecks(balancer service.Balancer) {
+	t := time.NewTicker(time.Minute * 2)
+	for {
+		select {
+		case <-t.C:
+			balancer.HealthCheck()
+		}
 	}
 }

@@ -1,3 +1,8 @@
+.PHONY: test
+
+test:
+	go test ./...
+
 build:
 	docker build -t load-balancer .
 
