@@ -40,9 +40,7 @@ k8s-release:
 	$(MAKE) k8s-wait
 
 k8s-wait:
-	kubectl -n $(KUBE_NS) rollout status deploy/web1 --timeout=120s
-	kubectl -n $(KUBE_NS) rollout status deploy/web2 --timeout=120s
-	kubectl -n $(KUBE_NS) rollout status deploy/web3 --timeout=120s
+	kubectl -n $(KUBE_NS) rollout status deploy/web --timeout=120s
 	kubectl -n $(KUBE_NS) rollout status deploy/$(DEPLOYMENT_NAME) --timeout=120s
 
 k8s-status:

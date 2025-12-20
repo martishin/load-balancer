@@ -22,6 +22,7 @@ spec:
         - name: load-balancer
           image: ghcr.io/martishin/load-balancer:latest
           imagePullPolicy: Always
+          command: [ "/app/load-balancer" ]
           args:
             - "--backends"
             - "http://web:80"
